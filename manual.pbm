@@ -1,0 +1,29 @@
+load value - loads a program
+save value - saves a program
+edit value - edit a progrma line
+clear - removes a program
+delete value - deletes a program line
+run - run a program
+pbload slotnumber - load a program
+pbsave slotnumber - save a program
+list - list all lines of program
+print value - prints text on the screen
+input value - reads datat form keyboad to a varible, value can be string or a number
+color - sets color of a graphic element
+fill - fills a closed cunte rof pixels with spefic color
+cls - clears screen
+sin value - sine of value
+cos value - cos of a value
+tan value - tan of a value
+rnd value - gneerates number on range (1, value)
+backround - set color of screen background
+goto value - goes to line value
+plot x, y- creates a point in (x, y)
+line x1, y1, x2, y2 - creates a line point x1, y1 to point x2, y2
+circle x, y, r - creates circle with radius r
+rem - comments
+if condtion then act
+else action2 - condtion must be true then action1, else action 2
+for var=value1 to value2 
+--...--
+next    - create a loop, incrising
