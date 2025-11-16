@@ -37,7 +37,9 @@ def runpb(lines):
 
         opcode = current[0]
         args   = current[1:]
-
+        if opcode == "REM":
+            i += 1
+            continue
         if opcode == "GOTO":
             target = int(args[0])
             i = numlist.index(target)
@@ -65,9 +67,17 @@ if __name__ == '__main__':
         elif p == 'HOME':
             print("\033[2J\033[H", end="")
         elif p == 'LIST':
-            for num in lines:
+            for num in sorted(lines):
                 print(f"{num} {" ".join(lines[num])}")
         elif p == 'DELETE':
-            del lines[int(j[0])]
+            if int(j[0]) in lines:
+                del lines[int(j[0])]
+        elif p == 'CLEAR':
+            lines = {}
+        elif p == 'SAVE':
+            with open(j[0]+'.pb', 'w') as f:
+                for num in lines:
+                    f.write(f'{num} {lines[num]}\n')
+            print('-'*3 + 'SAVED PROGRAM ' + '-'*3)
         elif p.isdigit():
             lines[int(p)] = j
