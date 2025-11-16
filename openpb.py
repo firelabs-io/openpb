@@ -1,3 +1,4 @@
+import time
 def parseline(line):
     parts = []
     i = 0
@@ -9,11 +10,11 @@ def parseline(line):
             continue
 
         if line[i] == '"':
-            start = i + 1
+            start = i
             i += 1
             while i < n and line[i] != '"':
                 i += 1
-            parts.append(line[start:i])   # clean string
+            parts.append(line[start:i+1])   # clean string
             i += 1
             continue
 
@@ -26,9 +27,11 @@ def parseline(line):
 
 def runpb(lines):
     numlist = sorted(lines.keys())
+    varibles = {}
     i = 0
 
     while i < len(numlist):
+        time.sleep(0.03)
         line_num = numlist[i]
         current = lines[line_num]
 
@@ -39,20 +42,32 @@ def runpb(lines):
             target = int(args[0])
             i = numlist.index(target)
             continue
-
         if opcode == "PRINT":
-            print(args[0])
-
+            if args[0] in varibles:
+                print(varibles[args[0]])
+            else:
+                print(args[0].replace('"', ''))
+        if opcode == "INPUT":
+            varibles[args[0]] = input('')
+            
         i += 1
 
 if __name__ == '__main__':
     lines = {}
-    varibles = {}
     print("\n**** open progressbasic v1 ****\nREADY\n")
     while True:
         inp = input()
         p, j = parseline(inp)
         if p == 'RUN':
             runpb(lines)
+            print("="*30)
+            print("THE PROGRAM HAS BEEN COMPLETED")
+        elif p == 'HOME':
+            print("\033[2J\033[H", end="")
+        elif p == 'LIST':
+            for num in lines:
+                print(f"{num} {" ".join(lines[num])}")
+        elif p == 'DELETE':
+            del lines[int(j[0])]
         elif p.isdigit():
             lines[int(p)] = j
