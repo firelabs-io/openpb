@@ -54,6 +54,18 @@ def runpb(lines):
             
         i += 1
 
+def load(file):
+    program = []
+    lines = {}
+    with open(file, 'r') as f:
+        program = f.read().split('\n')
+        del program[-1]
+    for e in program:
+        ind, parts = parseline(e)
+        lines[int(ind)] = parts
+        print(lines)
+    return lines
+
 if __name__ == '__main__':
     lines = {}
     print("\n**** open progressbasic v1 ****\nREADY\n")
@@ -77,7 +89,9 @@ if __name__ == '__main__':
         elif p == 'SAVE':
             with open(j[0]+'.pb', 'w') as f:
                 for num in lines:
-                    f.write(f'{num} {lines[num]}\n')
+                    f.write(f'{num} {" ".join(lines[num])}\n')
             print('-'*3 + 'SAVED PROGRAM ' + '-'*3)
+        elif p == 'LOAD':
+            lines = load(j[0]+'.pb')
         elif p.isdigit():
             lines[int(p)] = j
