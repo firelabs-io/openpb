@@ -9,7 +9,7 @@ def parseline(line):
             i += 1
             continue
 
-        if line[i] == '"':
+        elif line[i] == '"':
             start = i
             i += 1
             while i < n and line[i] != '"':
@@ -17,17 +17,63 @@ def parseline(line):
             parts.append(line[start:i+1])   # clean string
             i += 1
             continue
-
-        start = i
-        while i < n and line[i] not in (' ', '"'):
-            i += 1
-        parts.append(line[start:i].upper())
+        elif line[i] in '+-*/':
+            parts.append(line[i])
+        else:
+            start = i
+            while i < n and line[i] not in (' ', ''):
+                i += 1
+            parts.append(line[start:i].upper())
 
     return parts[0], parts[1:]
 
 def runpb(lines):
+    def split(s):
+        tokens = []
+        temp = ''
+        for c in s:
+            if c in '+-*/':
+                if temp:
+                    tokens.append(temp)
+                    temp = ''
+                tokens.append(c)
+            else:
+                temp += c
+        if temp:
+            tokens.append(temp)
+        return tokens
     numlist = sorted(lines.keys())
     varibles = {}
+    def ev(exp):
+        # Step 1: split first token and replace variables
+        pass1 = []
+        for k in split(exp[0]):
+            if k in varibles:
+                pass1.append(str(varibles[k]))
+            else:
+                pass1.append(k)
+
+        if len(pass1) == 1:
+            return pass1[0]
+
+        # Step 2: compute arithmetic left-to-right
+        temp = [pass1[0]]  # start with first number
+        j = 1
+        while j < len(pass1):
+            op = pass1[j]
+            num = pass1[j+1]
+            if op == '+':
+                temp[0] = str(int(temp[0]) + int(num))
+            elif op == '-':
+                temp[0] = str(int(temp[0]) - int(num))
+            elif op == '*':
+                temp[0] = str(int(temp[0]) * int(num))
+            elif op == '/':
+                temp[0] = str(int(temp[0]) // int(num))
+            j += 2
+
+        return temp[0]
+
     i = 0
 
     while i < len(numlist):
@@ -45,13 +91,11 @@ def runpb(lines):
             i = numlist.index(target)
             continue
         if opcode == "PRINT":
-            if args[0] in varibles:
-                print(varibles[args[0]])
-            else:
-                print(args[0].replace('"', ''))
+            print(ev(args))
         if opcode == "INPUT":
             varibles[args[0]] = input('')
-            
+        if opcode == 'CLS':
+            print("\033[2J\033[H", end="")
         i += 1
 
 def load(file):
@@ -87,11 +131,11 @@ if __name__ == '__main__':
         elif p == 'CLEAR':
             lines = {}
         elif p == 'SAVE':
-            with open(j[0]+'.pb', 'w') as f:
+            with open(j[0]+'.txt', 'w') as f:
                 for num in lines:
                     f.write(f'{num} {" ".join(lines[num])}\n')
             print('-'*3 + 'SAVED PROGRAM ' + '-'*3)
         elif p == 'LOAD':
-            lines = load(j[0]+'.pb')
+            lines = load(j[0]+'.txt')
         elif p.isdigit():
             lines[int(p)] = j
