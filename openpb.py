@@ -1,4 +1,7 @@
 import time
+import math
+import random
+
 def parseline(line):
     parts = []
     i = 0
@@ -32,7 +35,7 @@ def runpb(lines):
         tokens = []
         temp = ''
         for c in s:
-            if c in '+-*/':
+            if c in '+-*/=()':
                 if temp:
                     tokens.append(temp)
                     temp = ''
@@ -57,8 +60,11 @@ def runpb(lines):
             return pass1[0]
 
         # Step 2: compute arithmetic left-to-right
-        temp = [pass1[0]]  # start with first number
-        j = 1
+        j = 0
+        temp = [0]
+        if pass1[0].isdigit():
+            temp = [pass1[0]]  # start with first number
+            j = 1
         while j < len(pass1):
             op = pass1[j]
             num = pass1[j+1]
@@ -70,6 +76,14 @@ def runpb(lines):
                 temp[0] = str(int(temp[0]) * int(num))
             elif op == '/':
                 temp[0] = str(int(temp[0]) // int(num))
+            elif op == 'SIN':
+                temp[0] = str(math.sin(math.radians(int(ev(pass1[j+2:])))))
+            elif op == 'COS':
+                temp[0] = str(math.cos(math.radians(int(ev(pass1[j+2:])))))
+            elif op == 'TAN':
+                temp[0] = str(math.tan(math.radians(int(ev(pass1[j+2:])))))            
+            elif op == 'RND':
+                temp[0] = str(random.randint(1, int(ev(pass1[j+2:]))))
             j += 2
 
         return temp[0]
@@ -77,7 +91,7 @@ def runpb(lines):
     i = 0
 
     while i < len(numlist):
-        time.sleep(0.03)
+        time.sleep(0.03) # mandetory lol
         line_num = numlist[i]
         current = lines[line_num]
 
@@ -90,10 +104,14 @@ def runpb(lines):
             target = int(args[0])
             i = numlist.index(target)
             continue
+        if opcode == "LET":
+            l = split(args[0])
+            varibles[l[0]] = l[2]
         if opcode == "PRINT":
             print(ev(args))
         if opcode == "INPUT":
-            varibles[args[0]] = input('')
+            l = split(args[0])
+            varibles[l[0]] = input('')
         if opcode == 'CLS':
             print("\033[2J\033[H", end="")
         i += 1
