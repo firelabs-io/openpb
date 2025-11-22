@@ -35,7 +35,7 @@ def runpb(lines):
         tokens = []
         temp = ''
         for c in s:
-            if c in '+-*/=()':
+            if c in '+-*/=()<>':
                 if temp:
                     tokens.append(temp)
                     temp = ''
@@ -76,6 +76,10 @@ def runpb(lines):
                 temp[0] = str(int(temp[0]) * int(num))
             elif op == '/':
                 temp[0] = str(int(temp[0]) // int(num))
+            elif op == '>':
+                temp[0] = str(int(temp[0]) > int(num))
+            elif op == '<':
+                temp[0] = str(int(temp[0]) < int(num))
             elif op == 'SIN':
                 temp[0] = str(math.sin(math.radians(int(ev(pass1[j+2:])))))
             elif op == 'COS':
@@ -87,9 +91,9 @@ def runpb(lines):
             j += 2
 
         return temp[0]
-
+    loops = []
     i = 0
-
+    LAST_IF = True
     while i < len(numlist):
         time.sleep(0.03) # mandetory lol
         line_num = numlist[i]
@@ -97,6 +101,72 @@ def runpb(lines):
 
         opcode = current[0]
         args   = current[1:]
+        if opcode == "FOR":
+            var_name, rest = args[0].split("=")[0], args[0].split("=")[1]
+            start_val = int(ev([rest]))
+            to_index = args.index("TO")
+            end_val = int(ev([args[to_index+1]]))
+            varibles[var_name] = start_val
+            loops.append({
+                "var": var_name,
+                "end": end_val,
+                "line": i
+            })
+
+        elif opcode == "NEXT":
+            var_name = args[0]
+            for loop in reversed(loops):
+                if loop["var"] == var_name:
+                    varibles[var_name] += 1
+                    if varibles[var_name] <= loop["end"]:
+                        i = loop["line"]
+                    else:
+                        loops.remove(loop)
+                    break
+        elif opcode == "IF":
+            cond = ev(args[0])
+            try:
+                cond_val = int(cond)
+            except:
+                cond_val = cond in ["True", "true"]
+            if cond_val:
+                LAST_IF = True
+                # Execute THEN part
+                if args[1].upper() == "THEN":
+                    then_code = args[2:]
+                    if then_code[0] == "GOTO":
+                        target = int(then_code[1])
+                        i = numlist.index(target)
+                        continue
+                    else:
+                        opcode = then_code[0]
+                        args = then_code[1:]
+            else:
+                LAST_IF = False
+                # Check for ELSE on next line
+                i += 1
+                if i < len(numlist):
+                    next_line = lines[numlist[i]]
+                    if next_line[0] == "ELSE":
+                        opcode = next_line[0]
+                        args = next_line[1:]
+                    else:
+                        i -= 1  # no ELSE, continue normally
+
+        elif opcode == "ELSE":
+            if not LAST_IF:
+                # Execute ELSE block
+                if args[0] == "GOTO":
+                    target = int(args[1])
+                    i = numlist.index(target)
+                    continue
+                else:
+                    opcode = args[0]
+                    args = args[1:]
+            else:
+                i += 1
+                continue
+
         if opcode == "REM":
             i += 1
             continue
