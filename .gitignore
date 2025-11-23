@@ -1,2 +1,6 @@
 *.pbm
 *.txt
+cppv/
+cppv/*
+gui.py
+.gitignore
